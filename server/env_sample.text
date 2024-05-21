@@ -1,0 +1,3 @@
+FRONTEND_URL = Add your frontend url in your .env file
+MONGODB_URI = Add your mongodb connection string url in your .env file
+JWT_SECRET_KEY = Add your secret web token in your .env file
