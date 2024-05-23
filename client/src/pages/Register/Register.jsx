@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
     Box,
     Grid,
@@ -19,6 +19,7 @@ import GoogleIcon from "@mui/icons-material/Google";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import XIcon from "@mui/icons-material/X";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const boxstyle = {
     position: "absolute",
@@ -112,8 +113,45 @@ const socialMediaIcon = {
 };
 
 function Register() {
-
     const navigate = useNavigate();
+
+    const [formData, setFormData] = useState({
+        firstName: "",
+        lastName: "",
+        email: "",
+        password: "",
+    });
+    const [showPassword, setShowPassword] = useState(false);
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const isValidEmail = (email) => {
+        // Basic email validation regex
+        return /\S+@\S+\.\S+/.test(email);
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (!isValidEmail(formData.email)) {
+            alert("Invalid email format");
+            return;
+        }
+
+        try {
+            const res = await axios.post(
+                `${process.env.REACT_APP_API_URL}/api/auth/signup`,
+                formData
+            );
+            if (res.data.status === "success") {
+                navigate("/login");
+            }
+        } catch (error) {
+            console.error("Error during registration:", error.response || error.message || error);
+        }
+    };
 
     return (
         <>
@@ -192,7 +230,7 @@ function Register() {
                                             money on marketing.
                                         </Typography>
 
-                                        <form>
+                                        <form onSubmit={handleSubmit}>
                                             <Grid container spacing={2} alignItems="center">
                                                 {/* First Name */}
 
@@ -211,7 +249,10 @@ function Register() {
                                                     <CustomInput
                                                         defaultValue="John"
                                                         name="firstName"
-                                                        id= "firstName"
+                                                        value={formData.firstName}
+                                                        onChange={handleChange}
+                                                        id="firstName"
+                                                        required
                                                     />
                                                 </Grid>
 
@@ -232,7 +273,9 @@ function Register() {
                                                     <CustomInput
                                                         defaultValue="Deere"
                                                         name="lastName"
-                                                        id= "lastName"
+                                                        value={formData.lastName}
+                                                        onChange={handleChange}
+                                                        id="lastName"
                                                         required
                                                     />
                                                 </Grid>
@@ -254,6 +297,8 @@ function Register() {
                                                     <CustomInput
                                                         defaultValue="john@deere.com"
                                                         name="email"
+                                                        value={formData.email}
+                                                        onChange={handleChange}
                                                         id="email"
                                                         required
                                                     />
@@ -276,6 +321,9 @@ function Register() {
                                                     <CustomInput
                                                         defaultValue="asecurepassword123"
                                                         name="password"
+                                                        type={showPassword ? 'text' : 'password'}
+                                                        value={formData.password}
+                                                        onChange={handleChange}
                                                         id="password"
                                                         required
                                                     />
@@ -292,7 +340,7 @@ function Register() {
                                                             marginLeft: "220px",
                                                         }}
                                                     >
-                                                        <Checkbox {...label} size="small" />
+                                                        <Checkbox {...label} size="small" onChange={(e) => setShowPassword(e.target.checked)} />
                                                         <Typography
                                                             sx={{
                                                                 fontSize: "13px",
