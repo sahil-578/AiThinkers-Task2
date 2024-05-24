@@ -34,7 +34,12 @@ const userSchema = mongoose.Schema({
         type: String,
         unique: true,
         sparse: true
-    }
+    },
+    facebookId: {
+        type: String,
+        unique: true,
+        sparse: true
+    },
 });
 
 const userModel = mongoose.model('User', userSchema);
