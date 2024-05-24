@@ -153,6 +153,12 @@ function Register() {
         }
     };
 
+    const googleAuth = () => {
+        window.open(`${process.env.REACT_APP_API_URL}/api/auth/google/callback`,
+            '_self'
+        );
+    };
+
     return (
         <>
             <div
@@ -391,7 +397,7 @@ function Register() {
                                                             }}
                                                         >
                                                             <Avatar sx={socialMediaIcon}>
-                                                                <GoogleIcon />
+                                                                <GoogleIcon onClick = {googleAuth}/>
                                                             </Avatar>
                                                             <Avatar
                                                                 sx={socialMediaIcon}

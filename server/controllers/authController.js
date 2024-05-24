@@ -2,7 +2,7 @@ const User = require('../models/userModel');
 const creatError = require('../utils/appError')
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-
+const passport = require('passport');
 
 // Register a User
 
@@ -77,3 +77,25 @@ exports.login = async(req, res, next) => {
     next(error);
   }
 }
+
+
+
+// google auth
+
+exports.googleAuth = passport.authenticate('google', { scope: ['profile', 'email'] });
+
+exports.googleAuthCallback = passport.authenticate('google', { 
+    successRedirect: '/dashboard',
+    failureRedirect: '/login'
+});
+
+
+// facebook auth
+
+exports.facebookAuth = passport.authenticate('facebook', { scope: 'email' });
+
+exports.facebookAuthCallback = passport.authenticate('facebook', {
+  failureRedirect: '/'
+}), (req, res) => {
+  res.redirect('/dashboard');
+};
