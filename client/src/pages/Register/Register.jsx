@@ -142,7 +142,7 @@ function Register() {
 
         try {
             const res = await axios.post(
-                `${process.env.REACT_APP_API_URL}/api/auth/signup`,
+                `${process.env.REACT_APP_BACKEND_URL}/api/auth/register`,
                 formData
             );
             if (res.data.status === "success") {
@@ -154,7 +154,7 @@ function Register() {
     };
 
     const googleAuth = () => {
-        window.open(`${process.env.REACT_APP_API_URL}/api/auth/google/callback`,
+        window.open(`${process.env.REACT_APP_BACKEND_URL}/api/auth/google/callback`,
             '_self'
         );
     };
@@ -253,7 +253,7 @@ function Register() {
                                                         FIRST NAME
                                                     </InputLabel>
                                                     <CustomInput
-                                                        defaultValue="John"
+                                                        placeholder="John"
                                                         name="firstName"
                                                         value={formData.firstName}
                                                         onChange={handleChange}
@@ -277,7 +277,7 @@ function Register() {
                                                         LAST NAME
                                                     </InputLabel>
                                                     <CustomInput
-                                                        defaultValue="Deere"
+                                                        placeholder="Deere"
                                                         name="lastName"
                                                         value={formData.lastName}
                                                         onChange={handleChange}
@@ -301,7 +301,7 @@ function Register() {
                                                         EMAIL
                                                     </InputLabel>
                                                     <CustomInput
-                                                        defaultValue="john@deere.com"
+                                                        placeholder="john@deere.com"
                                                         name="email"
                                                         value={formData.email}
                                                         onChange={handleChange}
@@ -325,7 +325,7 @@ function Register() {
                                                         PASSWORD
                                                     </InputLabel>
                                                     <CustomInput
-                                                        defaultValue="asecurepassword123"
+                                                        placeholder="asecurepassword123"
                                                         name="password"
                                                         type={showPassword ? 'text' : 'password'}
                                                         value={formData.password}
@@ -397,7 +397,7 @@ function Register() {
                                                             }}
                                                         >
                                                             <Avatar sx={socialMediaIcon}>
-                                                                <GoogleIcon onClick = {googleAuth}/>
+                                                                <GoogleIcon onClick={googleAuth}/>
                                                             </Avatar>
                                                             <Avatar
                                                                 sx={socialMediaIcon}

@@ -1,101 +1,88 @@
-const User = require('../models/userModel');
-const creatError = require('../utils/appError')
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const userModel = require('../models/userModel');
+const { hashSync, compareSync } = require('bcrypt');
 const passport = require('passport');
+const jwt = require('jsonwebtoken');
+require('../config/passport')
+require('dotenv').config()
 
 // Register a User
 
-exports.signup = async (req, res, next) => {
-  try {
-    const user = await User.findOne({ email : req.body.email });
-    
-    if (user) {
-        return next(new creatError('User already exists !', 400));
-    }
-
-    const hashedPassword = await bcrypt.hash(req.body.password,12);
-
-    const newUser = await User.create({
-      ...req.body,
-      password: hashedPassword,
-    });
-
-    // Assign JWT to a user
-
-    const token = jwt.sign(
-      {_id: newUser._id}, 
-      process.env.JWT_SECRET_KEY, 
-      {expiresIn : '30d'});
-
-      res.status(201).json({
-        message : "User Registered successfully",
-        token,
-        status: 'success'
+exports.register = async (req, res, next) => {
+    const user = new userModel({
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        email: req.body.email,
+        password: hashSync(req.body.password, 10)
     })
 
+    user.save().then(user => {
+        res.send({
+            success: true,
+            message: "User created successfully.",
+            user: {
+                id: user._id,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email
+            }
+        })
+    }).catch(err => {
+        res.send({
+            success: false,
+            message: "Something went wrong",
+            error: err
+        })
+    })
   }
-  catch(error){
-    next(error);
-  }
-}
-
-
+  
+  
 // Logging a User
-
+  
 exports.login = async(req, res, next) => {
-  try{
-    const {email, password} = req.body;
-    const user = await User.findOne({email});
-
-    if(!user) return next(new creatError('User not found !', 404))
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
-    if(!isPasswordValid){
-      return next(new creatError('Invalid email or password !', 401));
-    }
-
-    const token = jwt.sign(
-      {_id: user._id}, 
-      process.env.JWT_SECRET_KEY, 
-      {expiresIn : '30d'});
-
-      res.status(200).json({
-        message : "User logged-in successfully",
-        token,
-        status: 'success',
-        user: {
-          _id: user._id,
-          firstName: user.firstName,
-          lastName : user.lastName,
-          email: user.email,
+    userModel.findOne({ email: req.body.email }).then(user => {
+        //No user found
+        if (!user) {
+            return res.status(401).send({
+                success: false,
+                message: "Could not find the user."
+            })
         }
-    })
-  }
-  catch(error){
-    next(error);
-  }
+
+        //Incorrect password
+        if (!compareSync(req.body.password, user.password)) {
+            return res.status(401).send({
+                success: false,
+                message: "Incorrect password"
+            })
+        }
+
+        const payload = {
+            email: user.email,
+            id: user._id
+        }
+
+        const token = jwt.sign(payload, process.env.JWT_SECRET_KEY, { expiresIn: "1d" })
+
+        return res.status(200).send({
+            success: true,
+            message: "Logged in successfully!",
+            token
+        })
+    })    
 }
 
 
+// Google OAuth callback
+exports.google = passport.authenticate('google', { scope: ['profile', 'email'] })
 
-// google auth
+exports.googleCallback = async (req, res) => {
+    const payload = {
+        email: req.user.email,
+        id: req.user._id
+    };
 
-exports.googleAuth = passport.authenticate('google', { scope: ['profile', 'email'] });
-
-exports.googleAuthCallback = passport.authenticate('google', { 
-    successRedirect: '/dashboard',
-    failureRedirect: '/login'
-});
-
-
-// facebook auth
-
-exports.facebookAuth = passport.authenticate('facebook', { scope: 'email' });
-
-exports.facebookAuthCallback = passport.authenticate('facebook', {
-  failureRedirect: '/'
-}), (req, res) => {
-  res.redirect('/dashboard');
+    const token = jwt.sign(payload, process.env.JWT_SECRET_KEY, { expiresIn: '1d' });
+    console.log("Generated Token:", token);
+    // Redirect or respond with the token
+    res.redirect(`${process.env.FRONTEND_URL}/dashboard?token=${token}`);
 };

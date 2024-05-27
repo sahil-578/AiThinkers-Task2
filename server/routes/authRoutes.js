@@ -1,14 +1,13 @@
 const express = require('express');
 const authController = require('../controllers/authController');
 const router = express.Router();
+const passport = require('passport')
 
-router.post('/signup', authController.signup);
+router.post('/register', authController.register);
 router.post('/login', authController.login);
 
-router.get('/google', authController.googleAuth);
-router.get('/google/callback', authController.googleAuthCallback);
-
-router.get('/facebook', authController.facebookAuth);
-router.get('/facebook/callback', authController.facebookAuthCallback);
+// Google OAuth routes
+router.get('/google', authController.google);
+router.get('/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), authController.googleCallback);
 
 module.exports = router;

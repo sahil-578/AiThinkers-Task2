@@ -1,147 +1,177 @@
-import React, {useState} from 'react'
-
-import { Box, Grid, Button, TextField, Typography, Container, Avatar, Checkbox, Stack, FormControlLabel } from '@mui/material'
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useState, useEffect} from 'react'
+import { Box, Grid, Button, TextField, Typography, Container, Avatar, Checkbox, Stack, FormControlLabel} from '@mui/material'
 import signinImg from '../../assets/images/signin.svg'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { styled } from '@mui/material/styles'
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../AuthContext';
 import GoogleIcon from "@mui/icons-material/Google";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import XIcon from "@mui/icons-material/X";
+import axios from 'axios';
 
 const boxstyle = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: "75%",
-  height: "80%",
-  bgcolor: "background.paper",
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: "75%",
+    height: "80%",
+    bgcolor: "background.paper",
 }
 
 const center = {
-  position: 'relative',
-  top: '50%',
-  left: '40%',
-  marginTop: '40px'
+    position: 'relative',
+    top: '50%',
+    left: '40%',
+    marginTop: '40px'
 }
 
 const EmailTextField = styled(TextField)({
-  '& input:valid + fieldset': {
-      borderColor: '#ffc300',
-      borderWidth: 1,
-  },
-  '& input:invalid + fieldset': {
-      borderColor: 'red',
-      borderWidth: 1,
-  },
-  '& input:valid:focus + fieldset': {
-      borderLeftWidth: 4,
-      padding: '4px !important',
-  },
-  '& label.Mui-focused': {
-      color: '#fc2c03',
-  },
-  '& label': {
-      color: '#ffc300',
-  },
-  '& .MuiOutlinedInput-root': {
-      '& fieldset': {
-          borderColor: '#ffc300',
-      },
-      '&.Mui-focused fieldset': {
-          borderColor: '#ffc300',
-      },
-  },
-  '& .MuiInputBase-input': {
-      color: '#fff',
-  },
-  '& input': {
-      color: '#fff',
-  },
+    '& input:valid + fieldset': {
+        borderColor: '#ffc300',
+        borderWidth: 1,
+    },
+    '& input:invalid + fieldset': {
+        borderColor: 'red',
+        borderWidth: 1,
+    },
+    '& input:valid:focus + fieldset': {
+        borderLeftWidth: 4,
+        padding: '4px !important',
+    },
+    '& label.Mui-focused': {
+        color: '#fc2c03',
+    },
+    '& label': {
+        color: '#ffc300',
+    },
+    '& .MuiOutlinedInput-root': {
+        '& fieldset': {
+            borderColor: '#ffc300',
+        },
+        '&.Mui-focused fieldset': {
+            borderColor: '#ffc300',
+        },
+    },
+    '& .MuiInputBase-input': {
+        color: '#fff',
+    },
+    '& input': {
+        color: '#fff',
+    },
 });
 
 
 const PasswordTextField = styled(TextField)({
-  '& input:valid + fieldset': {
-      borderColor: '#ffc300',
-      borderWidth: 1,
-  },
-  '& input:invalid + fieldset': {
-      borderColor: 'red',
-      borderWidth: 1,
-  },
-  '& input:valid:focus + fieldset': {
-      borderLeftWidth: 4,
-      padding: '4px !important',
-  },
-  '& label.Mui-focused': {
-      color: '#fc2c03',
-  },
-  '& label': {
-      color: '#ffc300',
-  },
-  '& .MuiOutlinedInput-root': {
-      '& fieldset': {
-          borderColor: '#ffc300',
-      },
-      '&.Mui-focused fieldset': {
-          borderColor: '#ffc300',
-      },
-  },
-  '& .MuiInputBase-input': {
-      color: '#fff',
-  },
-  '& input': {
-      color: '#fff',
-  },
+    '& input:valid + fieldset': {
+        borderColor: '#ffc300',
+        borderWidth: 1,
+    },
+    '& input:invalid + fieldset': {
+        borderColor: 'red',
+        borderWidth: 1,
+    },
+    '& input:valid:focus + fieldset': {
+        borderLeftWidth: 4,
+        padding: '4px !important',
+    },
+    '& label.Mui-focused': {
+        color: '#fc2c03',
+    },
+    '& label': {
+        color: '#ffc300',
+    },
+    '& .MuiOutlinedInput-root': {
+        '& fieldset': {
+            borderColor: '#ffc300',
+        },
+        '&.Mui-focused fieldset': {
+            borderColor: '#ffc300',
+        },
+    },
+    '& .MuiInputBase-input': {
+        color: '#fff',
+    },
+    '& input': {
+        color: '#fff',
+    },
 });
 
 
 const socialMediaIcon = {
-  color: "#2F4F4F",
-  background: "#fff",
-  padding: "10px",
-  borderRadius: "50%",
-  fontSize: "20px",
-  border: "1px solid #2F4F4F",
-  width: "15px",
-  height: "15px",
+    color: "#2F4F4F",
+    background: "#fff",
+    padding: "10px",
+    borderRadius: "50%",
+    fontSize: "20px",
+    border: "1px solid #2F4F4F",
+    width: "15px",
+    height: "15px",
 };
 
+
 function Login() {
+    const [remember, setRemember] = useState(false);
 
-  const navigate = useNavigate();
+    const [formData, setFormData] = useState({
+        email: '',
+        password: '',
+    });
 
-  const [remember, setRemember] = useState(false);
+    const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
 
-  const { login } = useAuth()
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        console.log('Stored token: ', token);
+        if (!token) {
+            navigate('/login');
+            return;
+        }
+        axios.get(`${process.env.REACT_APP_BACKEND_URL}/dashboard`, {
+            headers: {
+                Authorization: `Bearer $(token)`,
+            }
+        }).then(res => {
+            console.log(res)
+            navigate('/dashboard')
+        }).catch(err => {
+            console.log(err);
+            navigate('/login')
+        })
+    }, [])
 
     const handleSubmit = async (e) => {
-      e.preventDefault();
-      await login(formData.email, formData.password);
-      navigate('/dashboard');
+        e.preventDefault();
+        try {
+            const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/auth/login`, formData);
+            console.log('Login response:',response.data)
+            const token  = `Bearer ${response.data.token}`
+            localStorage.setItem('token', token);
+            console.log('Stored token : ', localStorage.getItem('token'))
+            navigate('/dashboard');
+        } catch (error) {
+            console.error('Login error:', error);
+        }
 
     };
 
     const googleAuth = () => {
-        window.open(`${process.env.REACT_APP_API_URL}/api/auth/google/callback`,
+        window.open(`${process.env.REACT_APP_BACKEND_URL}/api/auth/google/callback`,
             '_self'
         );
     };
 
-  return (
-    <>
+
+    console.log("Frontend Url", process.env.REACT_APP_FRONTEND_URL);
+    console.log("backend Url", process.env.REACT_APP_API_URL);
+
+    return (
+        <>
             <div
                 style={{
                     height: "100vh",
@@ -197,7 +227,7 @@ function Login() {
                                                     label='username'
                                                     name='email'
                                                     autoComplete='email'
-                                                    defaultValue="john@deere.com"
+                                                    placeholder="john@deere.com"
                                                     value={formData.email}
                                                     onChange={handleChange}
                                                 />
@@ -215,7 +245,8 @@ function Login() {
                                                     label='password'
                                                     name='password'
                                                     autoComplete='new-password'
-                                                    defaultValue="asecurepassword@123"
+                                                    placeholder="asecurepassword@123"
+                                                    type='password'
                                                     value={formData.password}
                                                     onChange={handleChange}
                                                 />
@@ -301,13 +332,13 @@ function Login() {
                                                             }}
                                                         >
                                                             <Avatar sx={socialMediaIcon}>
-                                                                <GoogleIcon onclick={googleAuth} />
+                                                                <GoogleIcon onClick={googleAuth} />
                                                             </Avatar>
                                                             <Avatar
                                                                 sx={socialMediaIcon}
                                                                 style={{ marginLeft: "20px" }}
                                                             >
-                                                                <FacebookIcon />
+                                                                <FacebookIcon  />
                                                             </Avatar>
                                                             <Avatar
                                                                 sx={socialMediaIcon}
@@ -318,7 +349,6 @@ function Login() {
                                                         </Box>
                                                     </Box>
                                                 </Grid>
-
 
                                             {/* Not Registered Yet */}
 
@@ -345,7 +375,7 @@ function Login() {
                 </Box>
             </div>
         </>
-  )
+    )
 }
 
 export default Login
