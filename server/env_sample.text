@@ -1,3 +1,12 @@
 FRONTEND_URL = Add your frontend url in your .env file
 MONGODB_URI = Add your mongodb connection string url in your .env file
 JWT_SECRET_KEY = Add your secret web token in your .env file
+
+GOOGLE_CLIENT_ID = Add you google client id here
+GOOGLE_CLIENT_SECRET = Add you google secret JWT_SECRET_KEY
+
+FACEBOOK_APP_ID = Add you facebook app id 
+FACEBOOK_APP_SECRET = Add your facebook secret key
+
+BACKEND_URL = add your backend url
+SESSION_SECRET = add your session secret token key 

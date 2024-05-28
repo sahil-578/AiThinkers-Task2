@@ -1,18 +1,38 @@
 const express = require('express')
 const cors = require('cors')
 require('dotenv').config()
-const bodyParser = require('body-parser');
 const authRouter = require('./routes/authRoutes.js');
+const passport = require('passport');
+
+require('./config/passport.js')
+
+const session = require('express-session')
 
 const app = express()
 
 // Middlewares 
-app.use(bodyParser.json());
+app.use(express.json());
+
+app.use(express.urlencoded({ extended: true }))
 
 app.use(cors({
     origin : process.env.FRONTEND_URL,
-    credentials : true
+    credentials : true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }))
+
+app.use(session({
+    secret : process.env.SESSION_SECRET,
+    resave : false,
+    saveUninitialized : true,
+    cookie : {
+        maxAge : 1000*60*60*24
+    }, 
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 
 // Database Connection
@@ -22,18 +42,18 @@ const connectDb = require('./config/connectDb.js')
 // Routes
 app.use('/api/auth', authRouter);
 
+console.log("Frontend Url", process.env.FRONTEND_URL);
 
-// Global Error Handler
-app.use((err, req, res, next) => {
-    err.statuCode = err.statuCode || 500;
-    err.status = err.status || 'error';
-
-    res.status(err.statuCode).json({
-        status : err.status,
-        message : err.message
-    });
-
-});
+app.get('/dashboard', passport.authenticate('jwt', { session: false }), (req, res) => {
+    console.log("Authenticated User:", req.user); // Log the authenticated user
+    return res.status(200).send({
+        success: true,
+        user: {
+            id: req.user._id,
+            email: req.user.email,
+        }
+    })
+})
 
 
 // Server
